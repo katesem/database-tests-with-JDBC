@@ -1,0 +1,17 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# Maven target directory
+target/
+
+# IDE-specific files
+.idea/
+.vscode/
+*.iml
+
+# Compiled classes
+*.class
+
+# Compiled binaries
+/bin/
