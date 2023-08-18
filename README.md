@@ -16,4 +16,4 @@ docker run --name mysql-container --network my-network -e MYSQL_ROOT_PASSWORD=qw
 
 docker run --name phpmyadmin-container --network my-network -d -e PMA_HOST=mysql-container -p 8080:80 phpmyadmin/phpmyadmin
 ```
-### Step 4: Access phpMyAdmin and create Database
+### Step 4: Access phpMyAdmin and create Database or create a database with JBDC
