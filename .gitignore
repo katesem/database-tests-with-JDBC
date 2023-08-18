@@ -1,0 +1,30 @@
+# Default ignored files
+/.idea/shelf/
+/workspace.xml
+
+# Maven target directory
+target/
+
+# IDE-specific files
+.idea/
+.vscode/
+*.iml
+
+# Compiled classes
+*.class
+
+# Compiled binaries
+/bin/
+/aws.xml
+/compiler.xml
+/jarRepositories.xml
+/libraries/Maven__com_beust_jcommander_1_82.xml
+/libraries/Maven__com_google_protobuf_protobuf_java_3_11_4.xml
+/libraries/Maven__mysql_mysql_connector_java_8_0_27.xml
+/libraries/Maven__org_slf4j_slf4j_api_1_7_36.xml
+/libraries/Maven__org_testng_testng_7_7_0.xml
+/libraries/Maven__org_webjars_jquery_3_6_1.xml
+/misc.xml
+/modules.xml
+/uiDesigner.xml
+/vcs.xml
