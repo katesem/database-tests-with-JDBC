@@ -1,6 +1,6 @@
-package com.core.tests;
+package com.core;
 
-import com.core.datasetup.DatabaseSetup;
+import com.core.database_operations.DatabaseOperations;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
@@ -9,16 +9,16 @@ import java.sql.SQLException;
 
 public class BaseTest {
 
-    protected Connection connection;
+    protected DatabaseOperations databaseOperations;
 
     @BeforeMethod
     public void setUp() throws SQLException {
-        DatabaseSetup.initialize();
-        connection = DatabaseSetup.connection;
+        databaseOperations = new DatabaseOperations();
+        databaseOperations.initialize();
     }
 
     @AfterMethod
     public void tearDown() throws SQLException {
-        DatabaseSetup.closeConnection();
+        databaseOperations.closeConnection();
     }
 }
