@@ -1,0 +1,28 @@
+# Run command: docker-compose up -d
+
+version: '3'
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql-container-test
+    environment:
+      MYSQL_ROOT_PASSWORD: qweqwe12
+    networks:
+      - my-network
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-container-test
+    environment:
+      PMA_HOST: mysql
+    networks:
+      - my-network
+    ports:
+      - "8080:80"
+
+networks:
+  my-network:
+    driver: bridge
+
