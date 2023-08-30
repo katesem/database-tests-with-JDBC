@@ -1,28 +1,30 @@
-# Run command: docker-compose up -d
+# To create containers: docker-compose up -d
+# To start previously created containers: docker compose start
+# To stop containers: docker compose stop
 
 version: '3'
 services:
   mysql:
     image: mysql:latest
-    container_name: mysql-container-test
+    container_name: mysql-container-jdbc
     environment:
       MYSQL_ROOT_PASSWORD: qweqwe12
     networks:
-      - my-network
+      - jdbc-network
     ports:
       - "3306:3306"
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin-container-test
+    container_name: phpadmin-container-jdbc
     environment:
       PMA_HOST: mysql
     networks:
-      - my-network
+      - jdbc-network
     ports:
       - "8080:80"
 
 networks:
-  my-network:
+  jdbc-network:
     driver: bridge
 
