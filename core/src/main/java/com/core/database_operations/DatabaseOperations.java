@@ -5,6 +5,7 @@ import org.testng.Assert;
 
 import java.io.IOException;
 import java.sql.*;
+import java.util.List;
 import java.util.Properties;
 
 public class DatabaseOperations {
@@ -24,12 +25,35 @@ public class DatabaseOperations {
     }
 
     public DatabaseOperations verifyTableRowCount(String tableName, int expRowCount) throws SQLException {
-        ResultSet resultSet = executeSelectQuery(tableName);
+        ResultSet resultSet = executeSelectAllQuery(tableName);
         int rowCount = 0;
         while (resultSet.next()) {
             rowCount++;
         }
         Assert.assertEquals(rowCount, expRowCount, String.format("Expected %d rows in the %s table", expRowCount, tableName));
+        return this;
+    }
+
+    public DatabaseOperations verifyRowValues(String tableName, List<Object[]> expectedRows) throws SQLException {
+        ResultSet resultSet = executeSelectAllQuery(tableName);
+        int rowNumber = 0;
+        while (resultSet.next() && rowNumber < expectedRows.size()) {
+            Object[] expectedValues = expectedRows.get(rowNumber);
+
+            for (int i = 0; i < expectedValues.length; i++) {
+                Object expectedValue = expectedValues[i];
+                Object actualValue = resultSet.getObject(i + 1);
+
+                Assert.assertEquals(actualValue, expectedValue, String.format("Value mismatch for column %d in row %d: Expected %s, but found %s", i + 1, rowNumber + 1, expectedValue, actualValue));
+            }
+
+            rowNumber++;
+        }
+
+        if (rowNumber != expectedRows.size()) {
+            throw new AssertionError("Number of rows returned from the query does not match the number of expected rows.");
+        }
+
         return this;
     }
 
@@ -46,24 +70,70 @@ public class DatabaseOperations {
         return this;
     }
 
-    //this method constructs creating table query with different count of parameters and types
-    public void createTableStatementConstructor(String tableName, String[] columnNames, String[] columnTypes) throws SQLException {
-        try (Statement statement = connection.createStatement()) {
+    // this method constructs creating table query with different count of parameters and types
+    public DatabaseOperations createTable(String tableName, String[] columnNames, String[] columnTypes) throws SQLException {
+        if (!checkIfTableExists(tableName)) {
             StringBuilder createTableSQL = new StringBuilder("CREATE TABLE ");
             createTableSQL.append(tableName).append(" (");
 
             for (int i = 0; i < columnNames.length; i++) {
-                createTableSQL.append(columnNames[i]).append(" ").append(columnTypes[i]);
+                createTableSQL.append("`").append(columnNames[i]).append("` ").append(columnTypes[i]);
                 if (i < columnNames.length - 1) {
                     createTableSQL.append(", ");
                 }
             }
             createTableSQL.append(")");
-            statement.executeUpdate(createTableSQL.toString());
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(createTableSQL.toString())) {
+                preparedStatement.executeUpdate();
+            }
+
+            boolean tableCreated = checkIfTableExists(tableName);
+            if (!tableCreated) {
+                throw new SQLException("Failed to create table: " + tableName);
+            }
         }
+        return this;
     }
 
-    private ResultSet executeSelectQuery(String tableName) throws SQLException {
+
+
+    public DatabaseOperations fillTableFields(String tableName, String[] columnNames, Object[] values) throws SQLException {
+        if (columnNames.length != values.length) {
+            throw new IllegalArgumentException("Number of column names must match the number of values.");
+        }
+
+        StringBuilder insertSQL = new StringBuilder("INSERT INTO ");
+        insertSQL.append(tableName).append(" (");
+
+        for (int i = 0; i < columnNames.length; i++) {
+            insertSQL.append(columnNames[i]);
+            if (i < columnNames.length - 1) {
+                insertSQL.append(", ");
+            }
+        }
+        insertSQL.append(") VALUES (");
+
+        for (int i = 0; i < values.length; i++) {
+            insertSQL.append("?");
+            if (i < values.length - 1) {
+                insertSQL.append(", ");
+            }
+        }
+        insertSQL.append(")");
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL.toString())) {
+            for (int i = 0; i < values.length; i++) {
+                preparedStatement.setObject(i + 1, values[i]);
+            }
+            preparedStatement.executeUpdate();
+        }
+
+        return this;
+    }
+
+
+    private ResultSet executeSelectAllQuery(String tableName) throws SQLException {
         String selectTableQuery = "SELECT * FROM " + tableName;
         Statement statement = connection.createStatement();
         return statement.executeQuery(selectTableQuery);
